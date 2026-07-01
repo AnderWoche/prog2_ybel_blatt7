@@ -16,13 +16,13 @@ public class Zoo {
         enclosures.add(enclosure);
     }
 
-    // copy list damit man nicht von ausen was bearbeiten kann.
+    // Kopie der Liste, damit von außen nichts an ihr bearbeitet werden kann.
     public List<Enclosure<? extends Animal>> getEnclosures() {
         return List.copyOf(enclosures);
     }
 
     /**
-     * @return ein biliebiges gehege deswegen ? extends Animal
+     * @return ein beliebiges Gehege, deswegen {@code ? extends Animal}
      */
     public Enclosure<? extends Animal> findEnclosureByName(String name) {
         return enclosures.stream()
@@ -51,7 +51,7 @@ public class Zoo {
     }
 
     /**
-     * @return alle Tieren nach Typ/Classe gemapped zu einer zahl
+     * @return alle Tiere nach Typ/Klasse gemappt auf eine Zahl
      */
     public Map<Class<? extends Animal>, Long> countAnimalsByType() {
         return getAllAnimals().stream()
@@ -59,8 +59,8 @@ public class Zoo {
     }
 
     /**
-     * @return einfac heine liste mit allen gehegen die einen beliebigen typ haben könnten.
-     * Andres geht es aber auch nicht sauber.
+     * @return einfach eine Liste mit allen Gehegen, die einen beliebigen Typ haben könnten.
+     * Anders geht es aber auch nicht sauber.
      */
     public List<Enclosure<? extends Animal>> getOvercrowdedEnclosures(int threshold) {
         return enclosures.stream()

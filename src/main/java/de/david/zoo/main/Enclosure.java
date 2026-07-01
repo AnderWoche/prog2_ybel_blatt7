@@ -11,8 +11,8 @@ public class Enclosure<T extends Animal> {
     private final String name;
 
     /**
-     * Begründung: Sett ist wie eine liste aber es fürfen keine doppelten Werte forkommen.
-     * tiere von der kleichen klasse werden ersetzt.
+     * Begründung: Ein Set ist wie eine Liste, aber es dürfen keine doppelten Werte vorkommen.
+     * Tiere von der gleichen Klasse werden ersetzt.
      */
     private final Set<T> animals = new HashSet<>();
 
