@@ -1,5 +1,6 @@
 package de.david.zoo.command;
 
+import de.david.zoo.animal.Animal;
 import de.david.zoo.main.Enclosure;
 
 import java.util.ArrayDeque;
@@ -11,6 +12,9 @@ import java.util.logging.Logger;
  * bereits die passende Wildcard ({@code Enclosure<? super A>}), deswegen genügt hier
  * {@code Command<? super T>} - ein Command, das für ein Gehege oberhalb (oder gleich) T
  * geeignet ist, kann sicher auf einem T ausgeführt werden.
+ *
+ * <p>Die Commands entscheiden nur noch fachlich über Erfolg/Fehler ({@link Result}),
+ * das Logging der Ergebnisse passiert zentral hier.</p>
  */
 public class CommandManager<T extends Enclosure<?>> {
 
@@ -22,11 +26,14 @@ public class CommandManager<T extends Enclosure<?>> {
     public void executeCommand(Command<? super T> command, T target) {
         LOG.info("executeCommand aufgerufen mit '" + command.description() + "'");
 
-        if (command.execute(target)) {
-            undoStack.push(command);
-            redoStack.clear();
-        } else {
-            LOG.warning("Kommando '" + command.description() + "' konnte nicht ausgeführt werden.");
+        Result<ZooError, Animal> result = command.execute(target);
+        switch (result) {
+            case Result.Success<ZooError, Animal> success -> {
+                undoStack.push(command);
+                redoStack.clear();
+            }
+            case Result.Failure<ZooError, Animal> failure -> LOG.warning(
+                    "Kommando '" + command.description() + "' konnte nicht ausgeführt werden: " + failure.error());
         }
 
         LOG.fine(() -> "Zustand von '" + target.getName() + "': " + target.getInhabitants());
@@ -39,10 +46,15 @@ public class CommandManager<T extends Enclosure<?>> {
             LOG.warning("undo nicht ausgeführt: Es liegt kein Kommando auf dem undoStack.");
         } else {
             Command<? super T> command = undoStack.pop();
-            if (!command.undo(target)) {
-                LOG.warning("undo für Kommando '" + command.description() + "' ist fehlgeschlagen.");
+            Result<ZooError, Animal> result = command.undo(target);
+            switch (result) {
+                case Result.Success<ZooError, Animal> success -> redoStack.push(command);
+                case Result.Failure<ZooError, Animal> failure -> {
+                    LOG.warning("undo für Kommando '" + command.description() + "' ist fehlgeschlagen: "
+                            + failure.error());
+                    redoStack.push(command);
+                }
             }
-            redoStack.push(command);
         }
 
         LOG.fine(() -> "Zustand von '" + target.getName() + "': " + target.getInhabitants());
@@ -55,10 +67,15 @@ public class CommandManager<T extends Enclosure<?>> {
             LOG.warning("redo nicht ausgeführt: Es liegt kein Kommando auf dem redoStack.");
         } else {
             Command<? super T> command = redoStack.pop();
-            if (!command.execute(target)) {
-                LOG.warning("redo für Kommando '" + command.description() + "' ist fehlgeschlagen.");
+            Result<ZooError, Animal> result = command.execute(target);
+            switch (result) {
+                case Result.Success<ZooError, Animal> success -> undoStack.push(command);
+                case Result.Failure<ZooError, Animal> failure -> {
+                    LOG.warning("redo für Kommando '" + command.description() + "' ist fehlgeschlagen: "
+                            + failure.error());
+                    undoStack.push(command);
+                }
             }
-            undoStack.push(command);
         }
 
         LOG.fine(() -> "Zustand von '" + target.getName() + "': " + target.getInhabitants());

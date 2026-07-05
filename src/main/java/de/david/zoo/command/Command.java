@@ -1,10 +1,12 @@
 package de.david.zoo.command;
 
+import de.david.zoo.animal.Animal;
+
 public interface Command<T> {
 
-    boolean execute(T target);
+    Result<ZooError, Animal> execute(T target);
 
-    boolean undo(T target);
+    Result<ZooError, Animal> undo(T target);
 
     String description();
 

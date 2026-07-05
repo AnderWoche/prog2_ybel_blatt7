@@ -3,15 +3,11 @@ package de.david.zoo.command;
 import de.david.zoo.animal.Animal;
 import de.david.zoo.main.Enclosure;
 
-import java.util.logging.Logger;
-
 /**
  * PECS: Das Ziel-Gehege ist "Consumer" von {@code A} (wir entfernen/fügen ein {@code A}),
  * daher {@code Enclosure<? super A>}, analog zu {@link AddAnimalCommand}.
  */
 public class RemoveAnimalCommand<A extends Animal> implements Command<Enclosure<? super A>> {
-
-    private final static Logger LOG = Logger.getLogger(RemoveAnimalCommand.class.getName());
 
     private boolean executed = false;
     private final A animal;
@@ -21,28 +17,24 @@ public class RemoveAnimalCommand<A extends Animal> implements Command<Enclosure<
     }
 
     @Override
-    public boolean execute(Enclosure<? super A> target) {
+    public Result<ZooError, Animal> execute(Enclosure<? super A> target) {
         executed = true;
-        if (!target.remove(animal)) {
-            LOG.warning("Could not remove animal from enclosure");
-            return false;
-        }
 
-        return true;
+        if (!target.remove(animal)) {
+            return Result.failure(ZooError.ANIMAL_NOT_IN_ENCLOSURE);
+        }
+        return Result.success(animal);
     }
 
     @Override
-    public boolean undo(Enclosure<? super A> target) {
+    public Result<ZooError, Animal> undo(Enclosure<? super A> target) {
         if (!executed) {
-            LOG.warning("Execute command was not executed before undo");
-            return false;
+            return Result.failure(ZooError.COMMAND_NOT_YET_EXECUTED);
         }
         if (!target.add(animal)) {
-            LOG.warning("Could not add animal to enclosure");
-            return false;
+            return Result.failure(ZooError.ANIMAL_ALREADY_IN_ENCLOSURE);
         }
-
-        return true;
+        return Result.success(animal);
     }
 
     @Override
