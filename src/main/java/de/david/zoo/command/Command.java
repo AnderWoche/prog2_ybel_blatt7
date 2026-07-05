@@ -6,6 +6,6 @@ public interface Command<T> {
 
     boolean undo(T target);
 
-    String getDescription();
+    String description();
 
 }
