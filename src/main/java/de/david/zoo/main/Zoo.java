@@ -5,6 +5,7 @@ import de.david.zoo.animal.Animal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -109,6 +110,15 @@ public class Zoo {
                 .toList();
         LOG.fine(result.size() + " überfüllte Gehege gefunden (Schwelle: " + threshold + ").");
         return result;
+    }
+
+    /**
+     * @return wildcard operator Weil wir ein Animal kriegen aber wir wissen nicht was für eins.
+     */
+    public Optional<? extends Animal> findAnimalByName(String animalName) {
+        return enclosures.stream().flatMap(enclosure -> enclosure.getInhabitants().stream())
+                .filter(animal -> animal.getName().equals(animalName))
+                .findFirst();
     }
 
     public String summary() {

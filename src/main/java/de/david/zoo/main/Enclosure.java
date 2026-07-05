@@ -4,6 +4,7 @@ import de.david.zoo.animal.Animal;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public class Enclosure<T extends Animal> {
@@ -34,6 +35,10 @@ public class Enclosure<T extends Animal> {
 
     public String getName() {
         return this.name;
+    }
+
+    public Optional<T> findAnimalByName(String animalName) {
+        return animals.stream().filter(animal -> animal.getName().equals(animalName)).findFirst();
     }
 
 
